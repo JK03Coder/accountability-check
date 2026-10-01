@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Accountability Check</string>
+    <string name="accessibility_description">Observes app window changes to show your intention prompt and return you Home when your chosen time expires. It does not read screen contents. Your intentions stay on this device. You can pause in the app or disable this service at any time.</string>
+</resources>

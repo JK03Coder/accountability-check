@@ -1,0 +1,8 @@
+<resources>
+    <item name="intention_input" type="id" />
+    <item name="duration_input" type="id" />
+    <item name="start_session" type="id" />
+    <item name="go_home" type="id" />
+    <item name="pause_protection" type="id" />
+    <item name="gate_title" type="id" />
+</resources>

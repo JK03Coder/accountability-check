@@ -1,0 +1,31 @@
+# Implementation status
+
+Updated: 1 October 2026. The app is native Kotlin and target API 36. This file records observed results separately from the original [plan](MVP-PLAN.md).
+
+## Built
+
+- Selected launchable apps trigger a branded, focusable intention and duration overlay after an observed app-window change. The original destination remains underneath until the user starts a session. Window-change events and a short active-window recheck handle a reversed recent-apps gesture that can omit a fresh app-open callback. A 550 ms quiet interval prevents intermediate recent-apps frames from repeatedly recreating the form; active-window checks continue briefly so a missed callback cannot leave the app ungated.
+- Sessions persist locally with monotonic deadlines; leaving and returning does not add time. A reminder and Home action end a session when the selected app remains confidently foreground. The reminder stays until the user taps **Dismiss**, and re-entry prompts again.
+- A separate, experimental phone-purpose mode checks wake/unlock signals and uses one session across apps. The user can choose whether locking ends that session or lets its original deadline continue. Its form omits Go Home. It never replaces Android authentication.
+- The Compose dashboard shows readiness, pause/resume, chosen apps, active countdowns, and a bounded local history. Settings provides System (default), Light, and Dark appearance for both the dashboard and Accessibility overlays. The launcher has an adaptive icon with a full-bleed background and a themed monochrome layer. The app provides explicit Accessibility disclosure and consent before opening system settings.
+- The repository validates and atomically stores settings/sessions with DataStore. The Accessibility service reads app identifiers from window events and the active window root; it does not traverse app content or read on-screen text. No analytics, backend, or cloud backup is configured.
+- A separate offline test-target module exercises deep links, in-app navigation, and a static screen without requiring a personal account.
+
+## Verification
+
+- Gradle debug APK and instrumentation APK compile with local JDK 20 and Android SDK 36.
+- 30 deterministic unit tests for session rules and the storage format pass, including compatibility for saved settings that predate the theme choice.
+- Android lint passes with no errors. Its remaining warnings concern SDK age/version availability, non-localized English UI strings, and a deprecated soft-input window hint; they do not establish device support.
+- All 11 instrumentation smoke tests pass on the dedicated Android 16 emulator. They exercise a reversed recent-apps gesture, gate cancellation, Settings escape, post-wake phone prompt, waking directly into a selected app, both phone-session lock settings, Back from phone mode, service reconnection over an already-open app, deep-link preservation, same-app navigation, early return, keyboard dismissal without losing typed intention, static one-minute expiry/Home, safe expiry while Settings is foreground, and fresh re-entry. An earlier event-only version intermittently missed the cutoff after a stale launcher event; the service checks `rootInActiveWindow.packageName` at deadline, wake, connection, window changes, and for a short period after a system transition.
+- The Settings screen was visually checked in Light and Dark on the dedicated emulator, including the default System selection. The dark Accessibility intention form and the full-bleed adaptive launcher icon were also checked there. The updated APK installed on the Pixel 8a without clearing its data or disabling its Accessibility service; appearance on the Pixel itself remains for the user to check.
+- On a Pixel 8a running Android 17, the APK installed, the user enabled Accessibility, and the selected offline test app displayed the branded gate. Gboard typing exposed a device-specific bug: dismissing the keyboard emitted a non-fullscreen keyboard window event and recreated the gate, erasing the draft. The service now ignores keyboard chrome events and hides the IME before interpreting Back as a gate cancel. A post-fix physical check confirmed synthetic text remained in the gate. The user then reported that a one-minute session, same-app navigation, typing, and the deadline reminder worked. Their feedback prompted a second change: the reminder now stays until dismissed; the user reported that revision worked well. After several days of use, the user found that a slow recent-apps gesture could leave a selected app interactive without the gate. The window-change/recheck build closed that bypass in the user's repeated physical attempts, but the form then flashed two or three times on entry through recent apps. The 550 ms quiet-interval revision removed the flashing according to the user. A faster 250 ms revision passed the emulator suite but caused rapid flashing on the Pixel, so it was removed and the previously stable 550 ms behavior was rebuilt and reinstalled. This is one phone and does not establish support for biometric unlock, other OEMs, split screen, private space, or work profile.
+
+## Current limits
+
+App interception is reactive, so the target can briefly appear first. Even with the active-window check, Android does not offer an atomic, universal foreground-app guarantee; the service suppresses Home when it cannot safely identify the selected app. Android or an OEM can stop or disconnect the service. Returning Home does not stop background uploads or audio. Pausing/disabling the service is always possible.
+
+The optional phone-purpose mode needs testing on the user's actual Android device and lock configuration before it should be called reliable. Play Store review and submission have not been attempted.
+
+## Next physical validation
+
+Work through secure unlock, calls, power-management, and longer-use cases on the Pixel 8a using the [device checklist](DEVICE-TEST-CHECKLIST.md), recording prompt latency and missed/interfering actions. If Play distribution is wanted, prepare the store disclosure, privacy policy, Accessibility declaration/video, and release signing after the core phone behavior is confirmed.
