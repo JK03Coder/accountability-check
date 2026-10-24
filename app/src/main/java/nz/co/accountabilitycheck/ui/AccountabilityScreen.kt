@@ -401,18 +401,21 @@ private fun TodayScreen(
         }
         if (settings.consentAccepted) {
             item {
-                Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                            Text(if (settings.protectionEnabled) "Prompts enabled" else "Prompts paused", fontWeight = FontWeight.SemiBold)
-                            Text(if (settings.protectionEnabled) "Pause whenever you need to." else "Resuming asks for a fresh intention.", style = MaterialTheme.typography.bodySmall, color = MutedInk)
+                Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
+                    SessionNotificationSettings(hideWhenEnabled = true)
+                    Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f).padding(end = 12.dp)) {
+                                Text(if (settings.protectionEnabled) "Prompts enabled" else "Prompts paused", fontWeight = FontWeight.SemiBold)
+                                Text(if (settings.protectionEnabled) "Pause whenever you need to." else "Resuming asks for a fresh intention.", style = MaterialTheme.typography.bodySmall, color = MutedInk)
+                            }
+                            Switch(
+                                checked = settings.protectionEnabled,
+                                onCheckedChange = onPauseToggle,
+                                enabled = !writing,
+                                modifier = Modifier.semantics { contentDescription = "Enable accountability prompts" },
+                            )
                         }
-                        Switch(
-                            checked = settings.protectionEnabled,
-                            onCheckedChange = onPauseToggle,
-                            enabled = !writing,
-                            modifier = Modifier.semantics { contentDescription = "Enable accountability prompts" },
-                        )
                     }
                 }
             }
@@ -472,6 +475,7 @@ private fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(22.dp),
     ) {
         item { PageTitle("Settings", "Make the app feel right for you.") }
+        item { SessionNotificationSettings() }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 SectionHeading("Appearance")

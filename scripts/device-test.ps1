@@ -22,7 +22,7 @@ foreach ($apk in $apks) {
 }
 New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
 $outputPath = Join-Path $artifacts "device-tests-$Serial.txt"
-$result = & $adb -s $Serial shell am instrument -w -r nz.co.accountabilitycheck.test/androidx.test.runner.AndroidJUnitRunner 2>&1
+$result = & $adb -s $Serial shell am instrument -w -r -e class nz.co.accountabilitycheck.AccessibilitySmokeTest nz.co.accountabilitycheck.test/androidx.test.runner.AndroidJUnitRunner 2>&1
 $result | Set-Content -LiteralPath $outputPath
 $result | Write-Output
 if ($LASTEXITCODE -ne 0 -or ($result -join "`n") -notmatch 'OK \(11 tests\)' -or ($result -join "`n") -match 'FAILURES!!!') {

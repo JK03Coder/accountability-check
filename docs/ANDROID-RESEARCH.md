@@ -60,6 +60,14 @@ Avoid `QUERY_ALL_PACKAGES`: Play disallows broad visibility when a narrower appr
 
 The starting design needs accessibility enablement and optionally notification permission for session reminders. An accessibility overlay does not require a separate application-overlay permission. Do not request Usage Access, Device Admin, exact-alarm access, or `SYSTEM_ALERT_WINDOW` speculatively.
 
+### Active intention countdowns
+
+Session notifications use Android's native chronometer in countdown mode, with the wall-time target derived from the remaining elapsed-time budget. The application refreshes that conversion on wall-clock changes; enforcement continues to use the original elapsed deadline. `setTimeoutAfter` removes the notification at the remaining deadline without a per-second application update loop. [Notification builder](https://developer.android.com/reference/android/app/Notification.Builder)
+
+The notification uses a standard BigText style, is ongoing, and requests Live Update promotion with `POST_PROMOTED_NOTIFICATIONS`. Android decides whether to show the status-bar chip, subject to the user's settings and device support. Dismissal is recorded per session so ordinary state changes do not repost a dismissed Live Update. AndroidX Core 1.17 provides the promotion request API while retaining compile SDK 36. [Live Updates](https://developer.android.com/develop/ui/views/notifications/live-update), [Core 1.17](https://developer.android.com/jetpack/androidx/releases/core#1.17.0)
+
+On Android 13+, posting also requires runtime `POST_NOTIFICATIONS` permission. The app requests it only from its notification control, and protection continues if permission is denied. Intention notifications use private visibility so lock-screen content follows Android's privacy settings. [Notification permission](https://developer.android.com/develop/ui/compose/notifications/notification-permission)
+
 Some Android 13+ installation paths restrict accessibility enablement until the user explicitly allows restricted settings. Account for that during APK testing and onboarding. [Android restricted settings](https://support.google.com/android/answer/12623953?hl=en)
 
 ## 7. Google Play route

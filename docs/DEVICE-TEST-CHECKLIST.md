@@ -49,6 +49,23 @@ Record device manufacturer/model, Android version/API, security update, app comm
 | Wall clock | During a session, change wall-clock time in Settings, then return. | Deadline still follows elapsed time. Restore the test device clock afterwards. |
 | History | Complete and interrupt sessions, then delete history. | Status and reasons are accurate; deletion removes history without granting extra access. |
 
+## Intention notifications
+
+Enable notifications using **Intention timer** on Today or Settings. On supported phones, allow **Live Updates** in the app's Android notification settings. Record notification and status-bar results separately: eligibility alone does not prove Android displayed a chip.
+
+| Check | Expected result |
+| --- | --- |
+| Start an app or phone intention | Notification shows the app/phone label, the written intention, and a live countdown. Tap it to open Accountability Check. |
+| Status bar | On a supported phone with Live Updates allowed, verify a timer chip appears and counts down without opening the shade. |
+| Switch apps, return, or lock/wake | Countdown keeps the original deadline. Lock-screen details respect Android's privacy settings. End-on-lock still ends a phone-mode session when selected. |
+| Multiple app sessions | Each intention has its own countdown. Expiring one removes only that notification. |
+| Expire, pause, remove an app, change mode, or disable the service | Notifications for ended/unavailable sessions disappear. Reconnecting the service restores only still-valid, undismissed intentions. |
+| Dismiss a notification where Android permits it | The timer keeps running. Window changes and process reconnection do not bring that notification back for the same session. |
+| Deny or revoke notifications | Prompts and enforcement continue. Enabling notifications while a session is active shows its remaining time without restarting it. |
+| Change the wall clock | Countdown continues to follow the original elapsed-time deadline. Restore the device clock afterwards. |
+
+The five focused checks in `SessionNotificationTest` validate countdown data, wall-clock conversion, rejection of expired timers, Live Update eligibility, and Android's notification expiry. Unlike the Accessibility smoke suite, they do not change saved sessions or protection settings. Run them with the [README command](../README.md#linux--omarchy-development). Visual chip rendering and the manual cases above still need device verification.
+
 ## Phone-purpose mode (experimental)
 
 Select the separate phone-purpose mode. Test with a protected fixture and an unselected harmless app. A protected-app fallback is required even if the device does not emit a reliable unlock signal.
@@ -75,7 +92,7 @@ Measure launch-to-overlay delay for 30 entries and deadline-to-cutoff for a stat
 
 ## Automation note
 
-Run the seven instrumentation smoke tests on a dedicated emulator. The script selects the serial, installs both APKs, and reports the result:
+Run the 11 instrumentation smoke tests on a dedicated emulator. On Linux, use the explicit installation and instrumentation commands in the [README](../README.md#linux--omarchy-development). On Windows, the script selects the serial, installs all three APKs, and reports the result:
 
 ```powershell
 .\scripts\device-test.ps1 -Serial emulator-5556
